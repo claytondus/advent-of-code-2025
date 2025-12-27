@@ -60,7 +60,33 @@ Analyze the rotations in your attached document. What's the actual password to o
 use std::env::current_dir;
 use std::fs;
 
-fn rotate(start: i32, direction: i32, distance: i32, part2: bool) -> (i32, i32) {
+fn rotate_brute(start: i32, direction: i32, distance: i32, part2: bool) -> (i32, i32) {
+    let mut zeros = 0;
+    let mut position = start.clone();
+    let mut n = distance.clone();
+
+    while n > 0 {
+        position += direction;
+        // Fix bounds
+        if position == 100 {
+            position = 0;
+        } else if position < 0 {
+            position = 99;
+        }
+        // Add zero crossings for part 2
+        if part2 && position == 0 {
+            zeros += 1;
+        }
+        n -= 1;
+    }
+    // Add zero endings for part 1
+    if (!part2 && position == 0) {
+        zeros += 1;
+    }
+    (position, zeros)
+}
+
+fn rotate_smart(start: i32, direction: i32, distance: i32, part2: bool) -> (i32, i32) {
     let mut zeros = 0;
     let mut end = (start + (distance * direction)) % 100;
     if part2 {
@@ -76,15 +102,19 @@ fn rotate(start: i32, direction: i32, distance: i32, part2: bool) -> (i32, i32) 
     // Position crossed zero
     if end < 0 {
         end += 100;
-        if part2 && start != 0 && distance < 100 {
+        if part2 && start != 0 {
             zeros += 1;
         }
-    } else if start + (direction * distance) > 100 && distance < 100 {
+    } else if start + (direction * distance) > 100 {
         if part2 {
             zeros += 1;
         }
     }
     (end, zeros)
+}
+
+fn rotate(start: i32, direction: i32, distance: i32, part2: bool) -> (i32, i32) {
+    rotate_brute(start, direction, distance, part2)
 }
 
 fn password(rotations: &Vec<&str>, part2: bool) -> (i32, i32) {
@@ -166,6 +196,18 @@ mod tests {
     }
 
     #[test]
+    fn test_rotate_l48() {
+        assert_eq!(rotate(48, -1, 48, false), (0, 1));
+        assert_eq!(rotate(48, -1, 48, true), (0, 1))
+    }
+
+    #[test]
+    fn test_rotate_l49() {
+        assert_eq!(rotate(48, -1, 49, false), (99, 0));
+        assert_eq!(rotate(48, -1, 49, true), (99, 1))
+    }
+
+    #[test]
     fn test_rotate_l5() {
         assert_eq!(rotate(0, -1, 5, false), (95, 0));
         assert_eq!(rotate(0, -1, 5, true), (95, 0))
@@ -211,5 +253,35 @@ mod tests {
     fn test_rotate_l1000() {
         assert_eq!(rotate(50, -1, 1000, false), (50, 0));
         assert_eq!(rotate(50, -1, 1000, true), (50, 10))
+    }
+
+    #[test]
+    fn test_rotate_r1000() {
+        assert_eq!(rotate(50, 1, 1000, false), (50, 0));
+        assert_eq!(rotate(50, 1, 1000, true), (50, 10))
+    }
+
+    #[test]
+    fn test_rotate_l1001() {
+        assert_eq!(rotate(50, -1, 1001, false), (49, 0));
+        assert_eq!(rotate(50, -1, 1001, true), (49, 10))
+    }
+
+    #[test]
+    fn test_rotate_r1001() {
+        assert_eq!(rotate(50, 1, 1001, false), (51, 0));
+        assert_eq!(rotate(50, 1, 1001, true), (51, 10))
+    }
+
+    #[test]
+    fn test_rotate_l1051() {
+        //assert_eq!(rotate(50, -1, 1051, false), (99, 0));
+        assert_eq!(rotate(50, -1, 1051, true), (99, 11))
+    }
+
+    #[test]
+    fn test_rotate_r1051() {
+        assert_eq!(rotate(50, 1, 1051, false), (1, 0));
+        assert_eq!(rotate(50, 1, 1051, true), (1, 11))
     }
 }
