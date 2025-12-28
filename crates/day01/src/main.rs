@@ -67,7 +67,7 @@ fn rotate_brute(start: i32, direction: i32, distance: i32, part2: bool) -> (i32,
 
     while n > 0 {
         position += direction;
-        // Fix bounds
+        // Wrap bounds
         if position == 100 {
             position = 0;
         } else if position < 0 {
