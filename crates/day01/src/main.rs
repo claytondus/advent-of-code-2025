@@ -57,7 +57,6 @@ Because the dial points at 0 a total of three times during this process, the pas
 
 Analyze the rotations in your attached document. What's the actual password to open the door?
  */
-use std::env::current_dir;
 use std::fs;
 
 fn rotate_brute(start: i32, direction: i32, distance: i32, part2: bool) -> (i32, i32) {
@@ -140,7 +139,6 @@ fn password(rotations: &Vec<&str>, part2: bool) -> (i32, i32) {
 }
 
 fn main() {
-    println!("{}", current_dir().unwrap().display());
     let input_strings = fs::read_to_string("./crates/day01/src/input.txt")
         .expect("File not found")
         .lines()

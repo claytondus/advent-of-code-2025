@@ -1,4 +1,3 @@
-use std::env::current_dir;
 use std::fs;
 
 fn validate(input: &str) -> bool {
@@ -62,13 +61,13 @@ fn sum_invalid(input: Vec<Vec<String>>) -> i64 {
 }
 
 fn main() {
-    println!("{}", current_dir().unwrap().display());
     let input_strings = fs::read_to_string("./crates/day02/src/input.txt")
         .expect("File not found")
         .lines()
         .map(String::from)
         .collect::<Vec<String>>();
     let input: Vec<&str> = input_strings.iter().map(AsRef::as_ref).collect();
+
     let invalids = find_invalids(input[0], false);
     invalids.iter().for_each(|invalid| {
         println!("{:?}", invalid);
