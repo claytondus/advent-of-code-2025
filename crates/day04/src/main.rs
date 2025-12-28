@@ -1,13 +1,13 @@
 use std::fs;
 
-fn get_char(data: &Vec<&str>, row: usize, col: usize) -> char {
-    data[row].chars().nth(col).unwrap()
+fn get_char(data: &Vec<Vec<char>>, row: usize, col: usize) -> char {
+    data[row][col]
 }
 
-fn get_adjacent(data: &Vec<&str>, row: usize, col: usize) -> Vec<(char, usize, usize)> {
+fn get_adjacent(data: &Vec<Vec<char>>, row: usize, col: usize) -> Vec<(char, usize, usize)> {
     let mut adjacent: Vec<(char, usize, usize)> = Vec::new();
     let rows = data.len();
-    let cols = data[0].chars().count();
+    let cols = data[0].len();
     // out of bounds
     if row > rows - 1 || col > cols - 1 {
         return adjacent;
@@ -42,11 +42,11 @@ fn get_adjacent(data: &Vec<&str>, row: usize, col: usize) -> Vec<(char, usize, u
     adjacent
 }
 
-fn find_accessible_rolls(data: &Vec<&str>) -> Vec<(usize, usize)> {
+fn find_accessible_rolls(data: &Vec<Vec<char>>) -> Vec<(usize, usize)> {
     let mut rolls: Vec<(usize, usize)> = Vec::new();
     for i in 0..data.len() {
         for j in 0..data[i].len() {
-            if get_char(&data, i, j) == '@' {
+            if get_char(data, i, j) == '@' {
                 let adjacent = get_adjacent(data, i, j)
                     .iter()
                     .filter(|d| d.0 == '@')
@@ -60,15 +60,36 @@ fn find_accessible_rolls(data: &Vec<&str>) -> Vec<(usize, usize)> {
     rolls
 }
 
+fn remove_accessible_rolls(data: Vec<Vec<char>>) -> u32 {
+    let mut result = data.clone();
+    let mut removed: u32 = 0;
+    loop {
+        let to_remove = find_accessible_rolls(&result);
+        if to_remove.is_empty() {
+            break;
+        }
+        for (row, col) in to_remove {
+            if let Some(index) = result[row].get_mut(col) {
+                *index = '.';
+            }
+            removed += 1;
+        }
+    }
+    removed
+}
+
 fn main() {
     let input = fs::read_to_string("./crates/day04/src/input.txt")
         .expect("File not found")
         .lines()
-        .map(String::from)
-        .collect::<Vec<String>>();
+        .map(|s| s.chars().collect::<Vec<char>>())
+        .collect::<Vec<_>>();
 
-    let part1 = find_accessible_rolls(&input.iter().map(AsRef::as_ref).collect::<Vec<_>>());
+    let part1 = find_accessible_rolls(&input);
     println!("Part 1: {}", part1.len());
+
+    let part2 = remove_accessible_rolls(input);
+    println!("Part 2: {}", part2);
 }
 
 #[cfg(test)]
@@ -90,6 +111,18 @@ mod tests {
 
     #[test]
     fn test_example() {
-        assert_eq!(find_accessible_rolls(&INPUT.to_vec()).len(), 13);
+        assert_eq!(
+            find_accessible_rolls(&INPUT.to_vec().iter().map(|s| s.chars().collect()).collect())
+                .len(),
+            13
+        );
+    }
+
+    #[test]
+    fn test_example2() {
+        assert_eq!(
+            remove_accessible_rolls(INPUT.to_vec().iter().map(|s| s.chars().collect()).collect()),
+            43
+        );
     }
 }
