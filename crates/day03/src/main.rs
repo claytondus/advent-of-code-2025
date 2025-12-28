@@ -32,6 +32,7 @@ fn largest_joltage_12(input: &str) -> u64 {
             .enumerate()
             .first_max_by_key(|&(_index, &val)| val)
             .unwrap();
+        // Shift start position after found digit's index
         last_index += index + 1;
         digits.push(max.clone())
     }
